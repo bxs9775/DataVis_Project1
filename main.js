@@ -3,8 +3,31 @@ let dataVis = {
   dataURL: "board-game-data.csv",
 };
 
+//Charting functions
+function createBarChart(data){
+  
+}
+
+function createCategoryChart(data){
+  
+}
+
+function createMechanicsChart(data){
+  
+}
+
+function createPlayersChart(data){
+  
+}
+
+function createPlaytimeChart(data){
+  
+}
+
+//Helper functions
 function processData(data){
   console.dir(data);
+  dataVis.dataset = data;
 }
 
 function rowConverter(data){
@@ -27,6 +50,7 @@ function rowConverter(data){
   }
 }
 
+//Setup
 function setup(){
   d3.csv(dataVis.dataURL, rowConverter).then(processData);
 }
