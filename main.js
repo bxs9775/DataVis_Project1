@@ -1,51 +1,59 @@
-"use strict";
+'use strict';
 
-let dataURL = "board-game-data.csv";
+let dataURL = 'board-game-data.csv';
 var dataset = {};
 var categoryData = {};
 var mechanicData = {};
 
 // Dimensions used by all charts
-let width = 100;
-let height = 100;
+let width = 600;
+let height = 850;
 let xPadding = 10;
 let yInnerPadding = 0.1;
 let yOuterPadding = 0.1;
 
 let color = 'grey';
 
-let key = (data) => data.id;
-
 //Charting functions
-function createBarChart(data,getX,getY){
+function createBarChart(data,key,getX,getY){
+  console.log('Create bar chart...');
+  
   //Create scales
+  let xMax = d3.max(data,getX);
   let xScale = d3.scaleLinear()
-    .domain([0,xData.max])
+    .domain([0,xMax])
     .rangeRound([0,width-(xPadding)]);
+  
+  let yMax = d3.max(data,getY)
   let yScale = d3.scaleBand()
-    .domain([0,yData.max])
+    .domain(data.map(getY))
     .rangeRound([0,height])
     .paddingInner(yInnerPadding)
     .paddingOuter(yOuterPadding);
   
   //Create svg chart
   let chart = d3.select('#charts').append('svg')
-    .attribute('width',width)
-    .attribute('height',height);
+    .attr('width',width)
+    .attr('height',height);
   
-  chart.select('rect')
+  chart.selectAll('rect')
     .data(data,key)
     .enter()
     .append('rect')
-    .attribute('x',xPadding)
-    .attribute('y',(d) => yScale(getY(d)))
-    .attribute('width',(d) => xScale(getX(d)))
-    .attribute('height',yScale.bandwidth())
-    .attribute('fill',color);
+    .attr('x',xPadding)
+    .attr('y',(d) => yScale(getY(d)))
+    .attr('width',(d) => xScale(getX(d)))
+    .attr('height',yScale.bandwidth())
+    .attr('fill',color);
 }
 
 function createCategoryChart(data){
+  console.log('Create category');
+  console.dir(data);
   
+  let getCat = (d) => d.category;
+  let getCount = (d) => d.count;
+  createBarChart(data,getCat,getCount,getCat);
 }
 
 function createMechanicsChart(data){
@@ -97,17 +105,18 @@ function getMechanics(data){
 }
 
 function processData(data){
+  console.log('Processing data');
   console.dir(data);
   dataset = data;
   
   categoryData = getCategories(data);
   mechanicData = getMechanics(data);
   
-  //console.dir(categoryData);
-  //console.dir(mechanicData);
+  createCategoryChart(categoryData);
 }
 
 function rowConverter(data){
+  console.log('Converting data');
   return {
     rank: parseInt(data.rank),
     id: data.game_id,
@@ -129,6 +138,7 @@ function rowConverter(data){
 
 //Setup
 function setup(){
+  console.log('Setup');
   d3.csv(dataURL, rowConverter).then(processData);
 }
 
