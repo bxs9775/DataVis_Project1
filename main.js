@@ -1,11 +1,47 @@
 "use strict";
-let dataVis = {
-  dataURL: "board-game-data.csv",
-};
+
+let dataURL = "board-game-data.csv";
+var dataset = {};
+var categoryData = {};
+var mechanicData = {};
+
+// Dimensions used by all charts
+let width = 100;
+let height = 100;
+let xPadding = 10;
+let yInnerPadding = 0.1;
+let yOuterPadding = 0.1;
+
+let color = 'grey';
+
+let key = (data) => data.id;
 
 //Charting functions
-function createBarChart(data){
+function createBarChart(data,getX,getY){
+  //Create scales
+  let xScale = d3.scaleLinear()
+    .domain([0,xData.max])
+    .rangeRound([0,width-(xPadding)]);
+  let yScale = d3.scaleBand()
+    .domain([0,yData.max])
+    .rangeRound([0,height])
+    .paddingInner(yInnerPadding)
+    .paddingOuter(yOuterPadding);
   
+  //Create svg chart
+  let chart = d3.select('#charts').append('svg')
+    .attribute('width',width)
+    .attribute('height',height);
+  
+  chart.select('rect')
+    .data(data,key)
+    .enter()
+    .append('rect')
+    .attribute('x',xPadding)
+    .attribute('y',(d) => yScale(getY(d)))
+    .attribute('width',(d) => xScale(getX(d)))
+    .attribute('height',yScale.bandwidth())
+    .attribute('fill',color);
 }
 
 function createCategoryChart(data){
@@ -25,9 +61,50 @@ function createPlaytimeChart(data){
 }
 
 //Helper functions
+
+function getArrayValuesCount(data, getArray){
+  let counts = {};
+  
+  let values = data.map(getArray).flat();
+  
+  //console.dir(values);
+  
+  //unique values counting solution from https://stackoverflow.com/questions/12749200/how-to-count-array-elements-by-each-element-in-javascript
+  for(var i = 0; i < values.length; i++){
+    counts[values[i]] = (counts[values[i]]+1) || 1;
+  }
+  //console.dir(counts);
+  let entries = Object.entries(counts);
+  return entries;
+}
+
+function getCategories(data){
+  return getArrayValuesCount(data,(d) => d.categories).map((entry) => {
+    return {
+      category: entry[0],
+      count: entry[1]
+    }
+  });
+}
+
+function getMechanics(data){
+  return getArrayValuesCount(data,(d) => d.mechanics).map((entry) => {
+    return {
+      mechanic: entry[0],
+      count: entry[1]
+    }
+  });
+}
+
 function processData(data){
   console.dir(data);
-  dataVis.dataset = data;
+  dataset = data;
+  
+  categoryData = getCategories(data);
+  mechanicData = getMechanics(data);
+  
+  //console.dir(categoryData);
+  //console.dir(mechanicData);
 }
 
 function rowConverter(data){
@@ -52,7 +129,7 @@ function rowConverter(data){
 
 //Setup
 function setup(){
-  d3.csv(dataVis.dataURL, rowConverter).then(processData);
+  d3.csv(dataURL, rowConverter).then(processData);
 }
 
 window.onload = setup;
