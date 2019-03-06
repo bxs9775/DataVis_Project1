@@ -6,11 +6,13 @@ var categoryData = {};
 var mechanicData = {};
 
 // Dimensions used by all charts
-let width = 600;
+let width = 850;
 let height = 850;
-let xPadding = 10;
+let xPadding = 150;
 let yInnerPadding = 0.1;
-let yOuterPadding = 0.1;
+let yBottomPadding = 18;
+let xAxisOff = yBottomPadding;
+let yAxisOff = xPadding;
 
 let color = 'grey';
 
@@ -27,9 +29,8 @@ function createBarChart(data,key,getX,getY){
   let yMax = d3.max(data,getY)
   let yScale = d3.scaleBand()
     .domain(data.map(getY))
-    .rangeRound([0,height])
-    .paddingInner(yInnerPadding)
-    .paddingOuter(yOuterPadding);
+    .rangeRound([0,height-yBottomPadding])
+    .paddingInner(yInnerPadding);
   
   //Create svg chart
   let chart = d3.select('#charts').append('svg')
@@ -45,11 +46,27 @@ function createBarChart(data,key,getX,getY){
     .attr('width',(d) => xScale(getX(d)))
     .attr('height',yScale.bandwidth())
     .attr('fill',color);
+  
+  //Axis
+  var xAxis = d3.axisBottom(xScale);
+  var yAxis = d3.axisLeft(yScale);
+  
+  chart.append('g')
+    .attr('class', 'xaxis axis')
+    .attr('transform', `translate(${yAxisOff},${height-xAxisOff})`)
+    .call(xAxis);
+  
+  chart.append('g')
+    .attr('class', 'yaxis axis')
+    .attr('transform', `translate(${yAxisOff},0 )`)
+    .call(yAxis);
 }
 
 function createCategoryChart(data){
   console.log('Create category');
   console.dir(data);
+  
+  data.sort((a,b) => b.count-a.count);
   
   let getCat = (d) => d.category;
   let getCount = (d) => d.count;
