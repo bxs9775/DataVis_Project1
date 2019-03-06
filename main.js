@@ -6,15 +6,17 @@ var categoryData = {};
 var mechanicData = {};
 
 // Dimensions used by all charts
-let width = 1000;
-let height = 850;
-let xLeftPadding = 250;
-let xRightPadding = 10;
-let yInnerPadding = 0.1;
-let yBottomPadding = 18;
-let xAxisOff = yBottomPadding;
-let yAxisOff = xLeftPadding;
-let spanXAdjust = xLeftPadding;
+let formatTemplate = {
+  width: 1000,
+  height: 850,
+  xLeftPadding: 160,
+  xRightPadding: 10,
+  yInnerPadding: 0.1,
+  yBottomPadding: 18,
+  xAdjust: 0,
+};
+formatTemplate.xAxisOff = formatTemplate.yBottomPadding;
+formatTemplate.yAxisOff = formatTemplate.xLeftPadding;
 
 let color = 'grey';
 
@@ -37,75 +39,85 @@ let sortCount = (a,b) => b.count-a.count;
 let sortRank = (a,b) => b.rank-a.rank;
 
 //Charting functions
-function createYScale(data,getY){
+function createYScale(format,data,getY){
   let yMax = d3.max(data,getY)
   let yScale = d3.scaleBand()
     .domain(data.map(getY))
-    .rangeRound([0,height-yBottomPadding])
-    .paddingInner(yInnerPadding);
+    .rangeRound([0,format.height-format.yBottomPadding])
+    .paddingInner(format.yInnerPadding);
   return yScale;
 }
 
-function createAxes(chart,xScale,yScale,xAdjust=0){
+function createAxes(chart,format,xScale,yScale){
   var xAxis = d3.axisBottom(xScale);
   var yAxis = d3.axisLeft(yScale);
   
   chart.append('g')
     .attr('class', 'xaxis axis')
-    .attr('transform', `translate(${yAxisOff-xAdjust},${height-xAxisOff})`)
+    .attr('transform', `translate(${format.yAxisOff-format.xAdjust},${format.height-format.xAxisOff})`)
     .call(xAxis);
   
   chart.append('g')
     .attr('class', 'yaxis axis')
-    .attr('transform', `translate(${yAxisOff},0 )`)
+    .attr('transform', `translate(${format.yAxisOff},0 )`)
     .call(yAxis);
 }
 
 function createBarChart(data,key,getX,getY){
   console.log('Create bar chart...');
   
+  //Format details
+  let format = Object.assign({},formatTemplate);
+  console.dir(format);
+  
   //Create scales
   let xMax = d3.max(data,getX);
   let xScale = d3.scaleLinear()
     .domain([0,xMax])
-    .rangeRound([0,width-(xLeftPadding+xRightPadding)]);
+    .rangeRound([0,format.width-(format.xLeftPadding+format.xRightPadding)]);
   
-  let yScale = createYScale(data,getY);
+  let yScale = createYScale(format,data,getY);
   
   //Create svg chart
   let chart = d3.select('#charts').append('svg')
-    .attr('width',width)
-    .attr('height',height);
+    .attr('width',format.width)
+    .attr('height',format.height);
   
   chart.selectAll('rect')
     .data(data,key)
     .enter()
     .append('rect')
-    .attr('x',xLeftPadding)
+    .attr('x',format.xLeftPadding)
     .attr('y',(d) => yScale(getY(d)))
     .attr('width',(d) => xScale(getX(d)))
     .attr('height',yScale.bandwidth())
     .attr('fill',color);
   
   //Axis
-  createAxes(chart,xScale,yScale);
+  createAxes(chart,format,xScale,yScale);
 }
 
 function createSpanChart(data,key,getMinX,getMaxX,getY){
   console.log('Create span chart...');
   
+  //Format details
+  let format = Object.assign({},formatTemplate);
+  format.xLeftPadding = 360;
+  format.yAxisOff = format.xLeftPadding;
+  format.xAdjust = format.xLeftPadding;
+  
   //Create scales
   let xMax = d3.max(data,getMaxX);
   let xScale = d3.scaleLinear()
     .domain([0,xMax])
-    .rangeRound([xLeftPadding,width-xRightPadding]);
+    .rangeRound([format.xLeftPadding,format.width-format.xRightPadding]);
   
-  let yScale = createYScale(data,getY);
+  let yScale = createYScale(format,data,getY);
   
   //Create svg chart
   let chart = d3.select('#charts').append('svg')
-    .attr('width',width)
-    .attr('height',height);
+    .attr('width',format.width)
+    .attr('height',format.height);
   
   chart.selectAll('rect')
     .data(data,key)
@@ -118,7 +130,7 @@ function createSpanChart(data,key,getMinX,getMaxX,getY){
     .attr('fill',color);
   
   //Axis
-  createAxes(chart,xScale,yScale,spanXAdjust);
+  createAxes(chart,format,xScale,yScale);
 }
 
 function createCategoryChart(data=categoryData){
