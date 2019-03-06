@@ -25,6 +25,30 @@ let getCount = (d) => d.count;
 let sortCount = (a,b) => b.count-a.count;
 
 //Charting functions
+function createYScale(data,getY){
+  let yMax = d3.max(data,getY)
+  let yScale = d3.scaleBand()
+    .domain(data.map(getY))
+    .rangeRound([0,height-yBottomPadding])
+    .paddingInner(yInnerPadding);
+  return yScale;
+}
+
+function createAxes(chart,xScale,yScale){
+  var xAxis = d3.axisBottom(xScale);
+  var yAxis = d3.axisLeft(yScale);
+  
+  chart.append('g')
+    .attr('class', 'xaxis axis')
+    .attr('transform', `translate(${yAxisOff},${height-xAxisOff})`)
+    .call(xAxis);
+  
+  chart.append('g')
+    .attr('class', 'yaxis axis')
+    .attr('transform', `translate(${yAxisOff},0 )`)
+    .call(yAxis);
+}
+
 function createBarChart(data,key,getX,getY){
   console.log('Create bar chart...');
   
@@ -34,11 +58,7 @@ function createBarChart(data,key,getX,getY){
     .domain([0,xMax])
     .rangeRound([0,width-(xPadding)]);
   
-  let yMax = d3.max(data,getY)
-  let yScale = d3.scaleBand()
-    .domain(data.map(getY))
-    .rangeRound([0,height-yBottomPadding])
-    .paddingInner(yInnerPadding);
+  let yScale = createYScale(data,getY);
   
   //Create svg chart
   let chart = d3.select('#charts').append('svg')
@@ -56,18 +76,11 @@ function createBarChart(data,key,getX,getY){
     .attr('fill',color);
   
   //Axis
-  var xAxis = d3.axisBottom(xScale);
-  var yAxis = d3.axisLeft(yScale);
+  createAxes(chart,xScale,yScale);
+}
+
+function createSpanChart(data,key,getMinX,getMaxX,getY){
   
-  chart.append('g')
-    .attr('class', 'xaxis axis')
-    .attr('transform', `translate(${yAxisOff},${height-xAxisOff})`)
-    .call(xAxis);
-  
-  chart.append('g')
-    .attr('class', 'yaxis axis')
-    .attr('transform', `translate(${yAxisOff},0 )`)
-    .call(yAxis);
 }
 
 function createCategoryChart(data=categoryData){
