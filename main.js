@@ -70,7 +70,7 @@ function createBarChart(data,key,getX,getY){
     .call(yAxis);
 }
 
-function createCategoryChart(data){
+function createCategoryChart(data=categoryData){
   //console.log('Create category');
   //console.dir(data);
   
@@ -79,7 +79,7 @@ function createCategoryChart(data){
   createBarChart(data,getCategory,getCount,getCategory);
 }
 
-function createMechanicsChart(data){
+function createMechanicsChart(data=mechanicData){
   //console.log('Create mechanics');
   //console.dir(data);
   
@@ -88,12 +88,34 @@ function createMechanicsChart(data){
   createBarChart(data,getMechanic,getCount,getMechanic);
 }
 
-function createPlayersChart(data){
+function createPlayersChart(data=dataset){
   
 }
 
-function createPlaytimeChart(data){
+function createPlaytimeChart(data=dataset){
   
+}
+
+function changeChart(){
+  let chartType = d3.select(this).node().value;
+  console.log(`Switching charts - new chart = ${chartType}`);
+  
+  d3.select('#charts').selectAll('svg').remove();
+  
+  switch(chartType){
+    case 'category':
+      createCategoryChart();
+      break;
+    case 'mechanics':
+      createMechanicsChart();
+      break;
+    case 'numPlayers':
+      createPlayersChart();
+      break;
+    case 'playTime':
+      createPlaytimeChart();
+      break;
+  }
 }
 
 //Helper functions
@@ -140,7 +162,9 @@ function processData(data){
   categoryData = getCategoriesArray(data);
   mechanicData = getMechanicsArray(data);
   
-  createCategoryChart(categoryData);
+  createCategoryChart();
+  console.log('Setting up chart switching event...');
+  d3.select('#dataViews').on('change',changeChart);
 }
 
 function rowConverter(data){
