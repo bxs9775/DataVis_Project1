@@ -8,12 +8,13 @@ var mechanicData = {};
 // Dimensions used by all charts
 let width = 1000;
 let height = 850;
-let xPadding = 200;
+let xLeftPadding = 250;
+let xRightPadding = 10;
 let yInnerPadding = 0.1;
 let yBottomPadding = 18;
 let xAxisOff = yBottomPadding;
-let yAxisOff = xPadding;
-let spanXAdjust = xPadding;
+let yAxisOff = xLeftPadding;
+let spanXAdjust = xLeftPadding;
 
 let color = 'grey';
 
@@ -67,7 +68,7 @@ function createBarChart(data,key,getX,getY){
   let xMax = d3.max(data,getX);
   let xScale = d3.scaleLinear()
     .domain([0,xMax])
-    .rangeRound([0,width-(xPadding)]);
+    .rangeRound([0,width-(xLeftPadding+xRightPadding)]);
   
   let yScale = createYScale(data,getY);
   
@@ -80,7 +81,7 @@ function createBarChart(data,key,getX,getY){
     .data(data,key)
     .enter()
     .append('rect')
-    .attr('x',xPadding)
+    .attr('x',xLeftPadding)
     .attr('y',(d) => yScale(getY(d)))
     .attr('width',(d) => xScale(getX(d)))
     .attr('height',yScale.bandwidth())
@@ -97,7 +98,7 @@ function createSpanChart(data,key,getMinX,getMaxX,getY){
   let xMax = d3.max(data,getMaxX);
   let xScale = d3.scaleLinear()
     .domain([0,xMax])
-    .rangeRound([xPadding,width]);
+    .rangeRound([xLeftPadding,width-xRightPadding]);
   
   let yScale = createYScale(data,getY);
   
