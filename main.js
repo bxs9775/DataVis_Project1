@@ -16,6 +16,14 @@ let yAxisOff = xPadding;
 
 let color = 'grey';
 
+//data getting functions
+let getCategory = (d) => d.category;
+let getMechanic = (d) => d.mechanic;
+let getCount = (d) => d.count;
+
+//data sorting functions
+let sortCount = (a,b) => b.count-a.count;
+
 //Charting functions
 function createBarChart(data,key,getX,getY){
   console.log('Create bar chart...');
@@ -63,18 +71,21 @@ function createBarChart(data,key,getX,getY){
 }
 
 function createCategoryChart(data){
-  console.log('Create category');
-  console.dir(data);
+  //console.log('Create category');
+  //console.dir(data);
   
-  data.sort((a,b) => b.count-a.count);
+  data.sort(sortCount);
   
-  let getCat = (d) => d.category;
-  let getCount = (d) => d.count;
-  createBarChart(data,getCat,getCount,getCat);
+  createBarChart(data,getCategory,getCount,getCategory);
 }
 
 function createMechanicsChart(data){
+  //console.log('Create mechanics');
+  //console.dir(data);
   
+  data.sort(sortCount);
+  
+  createBarChart(data,getMechanic,getCount,getMechanic);
 }
 
 function createPlayersChart(data){
@@ -103,7 +114,7 @@ function getArrayValuesCount(data, getArray){
   return entries;
 }
 
-function getCategories(data){
+function getCategoriesArray(data){
   return getArrayValuesCount(data,(d) => d.categories).map((entry) => {
     return {
       category: entry[0],
@@ -112,7 +123,7 @@ function getCategories(data){
   });
 }
 
-function getMechanics(data){
+function getMechanicsArray(data){
   return getArrayValuesCount(data,(d) => d.mechanics).map((entry) => {
     return {
       mechanic: entry[0],
@@ -126,8 +137,8 @@ function processData(data){
   console.dir(data);
   dataset = data;
   
-  categoryData = getCategories(data);
-  mechanicData = getMechanics(data);
+  categoryData = getCategoriesArray(data);
+  mechanicData = getMechanicsArray(data);
   
   createCategoryChart(categoryData);
 }
