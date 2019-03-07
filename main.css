@@ -1,3 +1,8 @@
 svg{
   padding: 6px;
+  display: inline;
+}
+
+svg.hidden{
+  display: none;
 }
