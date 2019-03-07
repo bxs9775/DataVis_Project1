@@ -56,6 +56,13 @@ let sortCount = (a,b) => b.count-a.count;
 let sortRank = (a,b) => b.rank-a.rank;
 
 //Tooltip and mouseover methods
+function displayTooltip(x,y){
+  tooltipDiv
+    .style('left',`${x+tooltipXOff}px`)
+    .style('top',`${y+tooltipYOff}px`)
+    .classed('hidden',false);
+}
+
 function categoricalTooltip(bar,count,total,category,type){
   tooltipDiv.selectAll('*').remove();
   
@@ -66,33 +73,21 @@ function categoricalTooltip(bar,count,total,category,type){
     .text(`${count} out of  ${total} games in the selection have the ${type} ${category}.`);
   
   //I don't know why but the below code breaks whrn it is a seperate function.
-  let tooltipX = 1*bar.attr('x');
-  let tooltipY = 1*bar.attr('y');
-  
-  tooltipDiv
-    .style('left',`${tooltipX+tooltipXOff}px`)
-    .style('top',`${tooltipY+tooltipYOff}px`)
-    .classed('hidden',false);
+  displayTooltip(1*bar.attr('x'),1*bar.attr('y'));
 }
 
 function gameTooltip(bar,data){
   tooltipDiv.selectAll('*').remove();
   
   tooltipDiv.append('p')
-    .text(`${data.name} - (${data.year})`)
+    .text(`${data.name} (${data.year})`)
     .attr('class','tooltipLabel');
   tooltipDiv.append('p').text(`Categories: ${data.categories.join(', ')}`);
   tooltipDiv.append('p').text(`Merchanics: ${data.mechanics.join(', ')}`);
   tooltipDiv.append('p').text(`Number of players: ${data.players.min}-${data.players.max}`);
   tooltipDiv.append('p').text(`Number of players: ${data.playtime.min}-${data.playtime.max} minutes, adverage playtime: ${data.playtime.avg} minutes`);
   
-  let tooltipX = spanChartOff;
-  let tooltipY = 1*bar.attr('y');
-  
-  tooltipDiv
-    .style('left',`${spanChartOff+tooltipXOff}px`)
-    .style('top',`${tooltipY+tooltipYOff}px`)
-    .classed('hidden',false);
+  displayTooltip(spanChartOff,1*bar.attr('y'));
 }
 
 function barOver(bar){
