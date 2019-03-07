@@ -215,7 +215,9 @@ function collapseChart(id){
   chart.transition('collapseChart')
     .duration(transition)
     .attr('width',0).on('end',function(){
-      d3.select(this).classed('hidden',true);
+      if(id != currChartId){
+        d3.select(this).classed('hidden',true);
+      }
     });
 }
 
