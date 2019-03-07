@@ -9,7 +9,7 @@ var mechanicData = {};
 // Dimensions used by all charts
 let formatTemplate = {
   width: 1000,
-  height: 850,
+  height: 1000,
   xLeftPadding: 160,
   xRightPadding: 16,
   yInnerPadding: 0.2,
@@ -131,7 +131,7 @@ function createSpanChart(id,data,key,getMinX,getMaxX,getY){
   format.xLeftPadding = 360;
   format.yAxisOff = format.xLeftPadding;
   format.xAdjust = format.xLeftPadding;
-  format.height = 1000;
+  //format.height = 1000;
   
   //Create scales
   let xMax = d3.max(data,getMaxX);
@@ -214,8 +214,9 @@ function collapseChart(id){
   console.log(chart);
   chart.transition('collapseChart')
     .duration(transition)
-    .attr('width',0);
-  chart.classed('hidden',true);
+    .attr('width',0).on('end',function(){
+      d3.select(this).classed('hidden',true);
+    });
 }
 
 function expandChart(id){
@@ -225,10 +226,10 @@ function expandChart(id){
   
   let chart = d3.select(`#${id}`);
   console.log(chart);
+  chart.classed('hidden',false);
   chart.transition('expandChart')
     .duration(transition)
     .attr('width',charts[id].format.width);
-  chart.classed('hidden',false);
   
   currChartId = id;
 }
