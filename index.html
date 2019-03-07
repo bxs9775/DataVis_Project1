@@ -2,9 +2,9 @@
 <html lang='en'>
   <head>
     <title>Project 1</title>
-    <meta charset="utf-8">
-    <script src="https://d3js.org/d3.v5.min.js"></script>
-    <link rel="stylesheet" href="main.css">
+    <meta charset='utf-8'>
+    <script src='https://d3js.org/d3.v5.min.js'></script>
+    <link rel='stylesheet' href='main.css'>
     <script src='./main.js'></script>
   </head>
 
@@ -14,11 +14,13 @@
     <!--Charts-->
     <label>Chart:</label>
     <select id='dataViews'>
-      <option default value="category">Category - Overview</option>
-      <option value="mechanics">Mechanics - Overview</option>
-      <option value="numPlayers">Games - Number of Players</option>
-      <option value="playTime">Games - Play Time</option>
+      <option default value='category'>Category - Overview</option>
+      <option value='mechanics'>Mechanics - Overview</option>
+      <option value='numPlayers'>Games - Number of Players</option>
+      <option value='playTime'>Games - Play Time</option>
     </select>
-    <div id="charts"></div>
+    <div id='charts'>
+      <div id='tooltip' class='hidden'></div>
+    </div>
   </body>
 </html>

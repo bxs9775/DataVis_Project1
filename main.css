@@ -3,6 +3,13 @@ svg{
   display: inline;
 }
 
-svg.hidden{
+.hidden{
   display: none;
+}
+
+#tooltip{
+  position: absolute;]
+  pointer-events: none;
+  background: white;
+  border: 1px solid black;
 }

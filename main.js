@@ -19,13 +19,18 @@ let formatTemplate = {
 formatTemplate.xAxisOff = formatTemplate.yBottomPadding;
 formatTemplate.yAxisOff = formatTemplate.xLeftPadding;
 
-let color = 'steelblue';
+let defaultColor = '#a8a6ac';
+let hoverColor = '#007dfd';
 
 let transition = 1000;
 
-// Chart info
+// Chart info and elements
 var currChartId = '';
 let charts = [];
+
+//Elements
+var chartDiv = {};
+var tooltipDiv = {};
 
 // Data fetching functions
 let getId = (d) => d.id;
@@ -92,7 +97,7 @@ function createBarChart(id,data,key,getX,getY){
   let yScale = createYScale(format,data,getY);
   
   //Create svg chart
-  let chart = d3.select('#charts').append('svg')
+  let chart = chartDiv.append('svg')
     .attr('width',0)
     .attr('height',format.height)
     .attr('id',id)
@@ -106,9 +111,13 @@ function createBarChart(id,data,key,getX,getY){
     .attr('y',(d) => yScale(getY(d)))
     .attr('width',(d) => xScale(getX(d)))
     .attr('height',yScale.bandwidth())
-    .attr('fill',color);
-    //.attr('stroke','black')
-    //.attr('strokewidth',1);
+    .style('fill',defaultColor)
+    .on('mouseover',(d) => {
+      let rect = d3.select(this);
+      console.dir(rect);
+      barOver(rect,d,categoricalTooltip);
+    })
+    .on('mouseout',barOut);
   
   //Axis
   let axes = createAxes(chart,format,xScale,yScale);
@@ -142,7 +151,7 @@ function createSpanChart(id,data,key,getMinX,getMaxX,getY){
   let yScale = createYScale(format,data,getY);
   
   //Create svg chart
-  let chart = d3.select('#charts').append('svg')
+  let chart = chartDiv.append('svg')
     .attr('width',0)
     .attr('height',format.height)
     .attr('id',id)
@@ -156,9 +165,9 @@ function createSpanChart(id,data,key,getMinX,getMaxX,getY){
     .attr('y',(d) => yScale(getY(d)))
     .attr('width',(d) => (xScale(getMaxX(d))-xScale(getMinX(d)) || 1))
     .attr('height',yScale.bandwidth())
-    .attr('fill',color);
-    //.attr('stroke','black')
-    //.attr('strokewidth',1);
+    .style('fill',defaultColor)
+    .on('mouseover',(d) => barOver(d3.select(this),d,gameTooltip))
+    .on('mouseout',barOut);
   
   //Axis
   let axes = createAxes(chart,format,xScale,yScale);
@@ -244,6 +253,44 @@ function changeChart(){
   expandChart(chartType);
 }
 
+//Tooltip and mouseover methods
+function displayTooltip(rect){
+  let tooltipX = 1*rect.attr('x');
+  let tooltipY = 1*rect.attr('y');
+  
+  tooltipDiv
+    .attr('x',`${tooltipX}px`)
+    .attr('y',`${tooltipY}px`)
+    .classed('hidden',false);
+}
+
+function categoricalTooltip(data,rect){
+  displayTooltip(rect);
+}
+
+function gameTooltip(data,rect){
+  displayTooltip(rect);
+}
+
+function barOver(rect,data,tooltipFunc){
+  rect.transition('mouseOver')
+  .duration(transition)
+    .style('fill',hoverColor);
+  console.dir(rect);
+  tooltipFunc(data,rect);
+}
+
+function barOut(data){
+  console.dir(this);
+  d3.select(this)
+    .transition('mouseOff')
+    .duration(transition)
+    .style('fill',defaultColor);
+  
+  
+  tooltipDiv.classed('hidden',true);
+}
+
 //Helper functions
 
 function getArrayValuesCount(data, getArray){
@@ -325,6 +372,10 @@ function rowConverter(data){
 //Setup
 function setup(){
   console.log('Setup');
+  
+  chartDiv = d3.select('#charts');
+  tooltipDiv = d3.select('#tooltip');
+  
   d3.csv(dataURL, rowConverter).then(processData);
 }
 
