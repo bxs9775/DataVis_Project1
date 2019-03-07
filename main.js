@@ -10,15 +10,15 @@ let formatTemplate = {
   width: 1000,
   height: 850,
   xLeftPadding: 160,
-  xRightPadding: 10,
-  yInnerPadding: 0.1,
-  yBottomPadding: 18,
+  xRightPadding: 16,
+  yInnerPadding: 0.2,
+  yBottomPadding: 16,
   xAdjust: 0,
 };
 formatTemplate.xAxisOff = formatTemplate.yBottomPadding;
 formatTemplate.yAxisOff = formatTemplate.xLeftPadding;
 
-let color = 'grey';
+let color = 'steelblue';
 
 //data getting functions
 let getId = (d) => d.id;
@@ -40,10 +40,11 @@ let sortRank = (a,b) => b.rank-a.rank;
 
 //Charting functions
 function createYScale(format,data,getY){
-  let yMax = d3.max(data,getY)
   let yScale = d3.scaleBand()
     .domain(data.map(getY))
-    .rangeRound([0,format.height-format.yBottomPadding])
+    //.rangeRound([0,format.height-format.yBottomPadding])
+    //Rangeround was producing undesirable extra-space at the ends of charts. Switching to range 
+    .range([0,format.height-format.yBottomPadding])
     .paddingInner(format.yInnerPadding);
   return yScale;
 }
@@ -92,6 +93,8 @@ function createBarChart(data,key,getX,getY){
     .attr('width',(d) => xScale(getX(d)))
     .attr('height',yScale.bandwidth())
     .attr('fill',color);
+    //.attr('stroke','black')
+    //.attr('strokewidth',1);
   
   //Axis
   createAxes(chart,format,xScale,yScale);
@@ -105,6 +108,7 @@ function createSpanChart(data,key,getMinX,getMaxX,getY){
   format.xLeftPadding = 360;
   format.yAxisOff = format.xLeftPadding;
   format.xAdjust = format.xLeftPadding;
+  format.height = 1000;
   
   //Create scales
   let xMax = d3.max(data,getMaxX);
@@ -125,9 +129,11 @@ function createSpanChart(data,key,getMinX,getMaxX,getY){
     .append('rect')
     .attr('x',(d) => xScale(getMinX(d)))
     .attr('y',(d) => yScale(getY(d)))
-    .attr('width',(d) => xScale(getMaxX(d))-xScale(getMinX(d)))
+    .attr('width',(d) => (xScale(getMaxX(d))-xScale(getMinX(d)) || 1))
     .attr('height',yScale.bandwidth())
     .attr('fill',color);
+    //.attr('stroke','black')
+    //.attr('strokewidth',1);
   
   //Axis
   createAxes(chart,format,xScale,yScale);
