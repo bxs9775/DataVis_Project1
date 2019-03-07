@@ -5,6 +5,7 @@ var dataset = {};
 var categoryData = {};
 var mechanicData = {};
 
+// Formatting
 // Dimensions used by all charts
 let formatTemplate = {
   width: 1000,
@@ -20,7 +21,10 @@ formatTemplate.yAxisOff = formatTemplate.xLeftPadding;
 
 let color = 'steelblue';
 
-//data getting functions
+// Array of charts
+let charts = [];
+
+// Data fetching functions
 let getId = (d) => d.id;
 
 let getCount = (d) => d.count;
@@ -62,9 +66,14 @@ function createAxes(chart,format,xScale,yScale){
     .attr('class', 'yaxis axis')
     .attr('transform', `translate(${format.yAxisOff},0 )`)
     .call(yAxis);
+  
+  return {
+    xAxis: xAxis,
+    yAxis: yAxis
+  }
 }
 
-function createBarChart(data,key,getX,getY){
+function createBarChart(id,data,key,getX,getY){
   console.log('Create bar chart...');
   
   //Format details
@@ -82,7 +91,8 @@ function createBarChart(data,key,getX,getY){
   //Create svg chart
   let chart = d3.select('#charts').append('svg')
     .attr('width',format.width)
-    .attr('height',format.height);
+    .attr('height',format.height)
+    .attr('id',`#${id}`);
   
   chart.selectAll('rect')
     .data(data,key)
@@ -97,10 +107,19 @@ function createBarChart(data,key,getX,getY){
     //.attr('strokewidth',1);
   
   //Axis
-  createAxes(chart,format,xScale,yScale);
+  let axes = createAxes(chart,format,xScale,yScale);
+  
+  return {
+    id: id,
+    format: format,
+    xScale: xScale,
+    yScale: yScale,
+    xAxis: axes.xAxis,
+    yAxis: axes.yAxis,
+  };
 }
 
-function createSpanChart(data,key,getMinX,getMaxX,getY){
+function createSpanChart(id,data,key,getMinX,getMaxX,getY){
   console.log('Create span chart...');
   
   //Format details
@@ -121,7 +140,8 @@ function createSpanChart(data,key,getMinX,getMaxX,getY){
   //Create svg chart
   let chart = d3.select('#charts').append('svg')
     .attr('width',format.width)
-    .attr('height',format.height);
+    .attr('height',format.height)
+    .attr('id',`#${id}`);
   
   chart.selectAll('rect')
     .data(data,key)
@@ -136,7 +156,16 @@ function createSpanChart(data,key,getMinX,getMaxX,getY){
     //.attr('strokewidth',1);
   
   //Axis
-  createAxes(chart,format,xScale,yScale);
+  let axes = createAxes(chart,format,xScale,yScale);
+  
+  return {
+    id: id,
+    format: format,
+    xScale: xScale,
+    yScale: yScale,
+    xAxis: axes.xAxis,
+    yAxis: axes.yAxis,
+  };
 }
 
 function createCategoryChart(data=categoryData){
@@ -145,7 +174,7 @@ function createCategoryChart(data=categoryData){
   
   data.sort(sortCount);
   
-  createBarChart(data,getCategory,getCount,getCategory);
+  createBarChart('category',data,getCategory,getCount,getCategory);
 }
 
 function createMechanicsChart(data=mechanicData){
@@ -154,7 +183,7 @@ function createMechanicsChart(data=mechanicData){
   
   data.sort(sortCount);
   
-  createBarChart(data,getMechanic,getCount,getMechanic);
+  createBarChart('mechanics',data,getMechanic,getCount,getMechanic);
 }
 
 function createPlayersChart(data=dataset){
@@ -163,7 +192,7 @@ function createPlayersChart(data=dataset){
   
   data.sort(sortRank);
   
-  createSpanChart(data,getId,getMinPlayers,getMaxPlayers,getName);
+  createSpanChart('numPlayers',data,getId,getMinPlayers,getMaxPlayers,getName);
 }
 
 function createPlaytimeChart(data=dataset){
@@ -172,7 +201,7 @@ function createPlaytimeChart(data=dataset){
   
   data.sort(sortRank);
   
-  createSpanChart(data,getId,getMinPlaytime,getMaxPlaytime,getName);
+  createSpanChart('playTime',data,getId,getMinPlaytime,getMaxPlaytime,getName);
 }
 
 function changeChart(){
@@ -241,7 +270,10 @@ function processData(data){
   categoryData = getCategoriesArray(data);
   mechanicData = getMechanicsArray(data);
   
-  createCategoryChart();
+  charts['category'] = createCategoryChart();
+  charts['mechanics'] = createMechanicsChart();
+  charts['numPlayers'] = createPlayersChart();
+  charts['playTime'] = createPlaytimeChart();
   console.log('Setting up chart switching event...');
   d3.select('#dataViews').on('change',changeChart);
 }
