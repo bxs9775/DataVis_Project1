@@ -2,6 +2,7 @@
 
 let dataURL = 'board-game-data.csv';
 var dataset = {};
+var totalGames = 0;
 var categoryData = {};
 var mechanicData = {};
 
@@ -19,10 +20,13 @@ let formatTemplate = {
 formatTemplate.xAxisOff = formatTemplate.yBottomPadding;
 formatTemplate.yAxisOff = formatTemplate.xLeftPadding;
 
+let tooltipXOff = 14;
+let tooltipYOff = 50;
+
 let defaultColor = '#a8a6ac';
 let hoverColor = '#007dfd';
 
-let transition = 1000;
+let transition = 600;
 
 // Chart info and elements
 var currChartId = '';
@@ -49,6 +53,46 @@ let getMaxPlaytime = (d) => d.playtime.max;
 //data sorting functions
 let sortCount = (a,b) => b.count-a.count;
 let sortRank = (a,b) => b.rank-a.rank;
+
+//Tooltip and mouseover methods
+function displayTooltip(bar){
+  let tooltipX = 1*bar.attr('x');
+  let tooltipY = 1*bar.attr('y');
+  
+  tooltipDiv
+    .style('left',`${tooltipX+tooltipXOff}px`)
+    .style('top',`${tooltipY+tooltipYOff}px`)
+    .classed('hidden',false);
+}
+
+function categoricalTooltip(bar,count,total,category,type){
+  tooltipDiv.selectAll('*').remove();
+  
+  tooltipDiv.append('p')
+    .text(category)
+    .attr('class','tooltipLabel');
+  tooltipDiv.append('p').text(`${count} out of  ${total} games in the selection have the ${type} ${category}.`);
+  
+  displayTooltip(bar);
+}
+
+function barOver(bar){
+  bar.transition('mouseOver')
+    .duration(transition)
+    .style('fill',hoverColor);
+}
+
+function barOut(data){
+  console.log("Mouse out.");
+  console.dir(this);
+  d3.select(this)
+    .transition('mouseOff')
+    .duration(transition)
+    .style('fill',defaultColor);
+  
+  
+  tooltipDiv.classed('hidden',true);
+}
 
 //Charting functions
 function createYScale(format,data,getY){
@@ -81,7 +125,7 @@ function createAxes(chart,format,xScale,yScale){
   }
 }
 
-function createBarChart(id,data,key,getX,getY){
+function createBarChart(id,data,key,getX,getY,mouseOver){
   console.log('Create bar chart...');
   
   //Format details
@@ -112,11 +156,7 @@ function createBarChart(id,data,key,getX,getY){
     .attr('width',(d) => xScale(getX(d)))
     .attr('height',yScale.bandwidth())
     .style('fill',defaultColor)
-    .on('mouseover',(d) => {
-      let rect = d3.select(this);
-      console.dir(rect);
-      barOver(rect,d,categoricalTooltip);
-    })
+    .on('mouseover',mouseOver)
     .on('mouseout',barOut);
   
   //Axis
@@ -132,7 +172,7 @@ function createBarChart(id,data,key,getX,getY){
   };
 }
 
-function createSpanChart(id,data,key,getMinX,getMaxX,getY){
+function createSpanChart(id,data,key,getMinX,getMaxX,getY,mouseOver){
   console.log('Create span chart...');
   
   //Format details
@@ -166,7 +206,7 @@ function createSpanChart(id,data,key,getMinX,getMaxX,getY){
     .attr('width',(d) => (xScale(getMaxX(d))-xScale(getMinX(d)) || 1))
     .attr('height',yScale.bandwidth())
     .style('fill',defaultColor)
-    .on('mouseover',(d) => barOver(d3.select(this),d,gameTooltip))
+    .on('mouseover',mouseOver)
     .on('mouseout',barOut);
   
   //Axis
@@ -182,22 +222,40 @@ function createSpanChart(id,data,key,getMinX,getMaxX,getY){
   };
 }
 
-function createCategoryChart(data=categoryData){
+function createCategoryChart(data=categoryData,total=totalGames){
   //console.log('Create category chart');
   //console.dir(data);
   
   data.sort(sortCount);
   
-  return createBarChart('category',data,getCategory,getCount,getCategory);
+  let mouseOver = function(d){
+    console.log("Mouse over.");
+    console.dir(this);
+    let bar = d3.select(this);
+    
+    barOver(bar);
+    categoricalTooltip(bar,d.count,total,d.category,'category');
+  };
+  
+  return createBarChart('category',data,getCategory,getCount,getCategory,mouseOver);
 }
 
-function createMechanicsChart(data=mechanicData){
+function createMechanicsChart(data=mechanicData,total=totalGames){
   //console.log('Create mechanics chart');
   //console.dir(data);
   
   data.sort(sortCount);
   
-  return createBarChart('mechanics',data,getMechanic,getCount,getMechanic);
+  let mouseOver = function(d){
+    console.log("Mouse over.");
+    console.dir(this);
+    let bar = d3.select(this);
+    
+    barOver(bar);
+    categoricalTooltip(bar,d.count,total,d.mechanic,'mechanic');
+  };
+  
+  return createBarChart('mechanics',data,getMechanic,getCount,getMechanic,mouseOver);
 }
 
 function createPlayersChart(data=dataset){
@@ -206,7 +264,11 @@ function createPlayersChart(data=dataset){
   
   data.sort(sortRank);
   
-  return createSpanChart('numPlayers',data,getId,getMinPlayers,getMaxPlayers,getName);
+  let mouseOver = function(e){
+    
+  }
+  
+  return createSpanChart('numPlayers',data,getId,getMinPlayers,getMaxPlayers,getName,mouseOver);
 }
 
 function createPlaytimeChart(data=dataset){
@@ -215,7 +277,11 @@ function createPlaytimeChart(data=dataset){
   
   data.sort(sortRank);
   
-  return createSpanChart('playTime',data,getId,getMinPlaytime,getMaxPlaytime,getName);
+  let mouseOver = function(e){
+    
+  }
+  
+  return createSpanChart('playTime',data,getId,getMinPlaytime,getMaxPlaytime,getName,mouseOver);
 }
 
 function collapseChart(id){
@@ -251,44 +317,6 @@ function changeChart(){
   
   collapseChart(currChartId);
   expandChart(chartType);
-}
-
-//Tooltip and mouseover methods
-function displayTooltip(rect){
-  let tooltipX = 1*rect.attr('x');
-  let tooltipY = 1*rect.attr('y');
-  
-  tooltipDiv
-    .attr('x',`${tooltipX}px`)
-    .attr('y',`${tooltipY}px`)
-    .classed('hidden',false);
-}
-
-function categoricalTooltip(data,rect){
-  displayTooltip(rect);
-}
-
-function gameTooltip(data,rect){
-  displayTooltip(rect);
-}
-
-function barOver(rect,data,tooltipFunc){
-  rect.transition('mouseOver')
-  .duration(transition)
-    .style('fill',hoverColor);
-  console.dir(rect);
-  tooltipFunc(data,rect);
-}
-
-function barOut(data){
-  console.dir(this);
-  d3.select(this)
-    .transition('mouseOff')
-    .duration(transition)
-    .style('fill',defaultColor);
-  
-  
-  tooltipDiv.classed('hidden',true);
 }
 
 //Helper functions
@@ -331,6 +359,7 @@ function processData(data){
   console.log('Processing data');
   console.dir(data);
   dataset = data;
+  totalGames = dataset.length;
   
   categoryData = getCategoriesArray(data);
   mechanicData = getMechanicsArray(data);

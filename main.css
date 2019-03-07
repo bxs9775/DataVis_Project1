@@ -8,8 +8,20 @@ svg{
 }
 
 #tooltip{
-  position: absolute;]
+  position: absolute;
   pointer-events: none;
   background: white;
-  border: 1px solid black;
+  border: 2px solid black;
+  padding: 3px;
+  font: 10pt Sans-Serif;
+}
+
+#tooltip p{
+  padding: 0px;
+}
+
+.tooltipLabel{
+  color: #007dfd;
+  font-weight: bold;
+  pointer-events: none;
 }
