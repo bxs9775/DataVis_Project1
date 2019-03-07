@@ -19,6 +19,7 @@ let formatTemplate = {
 };
 formatTemplate.xAxisOff = formatTemplate.yBottomPadding;
 formatTemplate.yAxisOff = formatTemplate.xLeftPadding;
+let spanChartOff = 360;
 
 let tooltipXOff = 14;
 let tooltipYOff = 50;
@@ -55,7 +56,16 @@ let sortCount = (a,b) => b.count-a.count;
 let sortRank = (a,b) => b.rank-a.rank;
 
 //Tooltip and mouseover methods
-function displayTooltip(bar){
+function categoricalTooltip(bar,count,total,category,type){
+  tooltipDiv.selectAll('*').remove();
+  
+  tooltipDiv.append('p')
+    .text(category)
+    .attr('class','tooltipLabel');
+  tooltipDiv.append('p')
+    .text(`${count} out of  ${total} games in the selection have the ${type} ${category}.`);
+  
+  //I don't know why but the below code breaks whrn it is a seperate function.
   let tooltipX = 1*bar.attr('x');
   let tooltipY = 1*bar.attr('y');
   
@@ -65,15 +75,24 @@ function displayTooltip(bar){
     .classed('hidden',false);
 }
 
-function categoricalTooltip(bar,count,total,category,type){
+function gameTooltip(bar,data){
   tooltipDiv.selectAll('*').remove();
   
   tooltipDiv.append('p')
-    .text(category)
+    .text(`${data.name} - (${data.year})`)
     .attr('class','tooltipLabel');
-  tooltipDiv.append('p').text(`${count} out of  ${total} games in the selection have the ${type} ${category}.`);
+  tooltipDiv.append('p').text(`Categories: ${data.categories.join(', ')}`);
+  tooltipDiv.append('p').text(`Merchanics: ${data.mechanics.join(', ')}`);
+  tooltipDiv.append('p').text(`Number of players: ${data.players.min}-${data.players.max}`);
+  tooltipDiv.append('p').text(`Number of players: ${data.playtime.min}-${data.playtime.max} minutes, adverage playtime: ${data.playtime.avg} minutes`);
   
-  displayTooltip(bar);
+  let tooltipX = spanChartOff;
+  let tooltipY = 1*bar.attr('y');
+  
+  tooltipDiv
+    .style('left',`${spanChartOff+tooltipXOff}px`)
+    .style('top',`${tooltipY+tooltipYOff}px`)
+    .classed('hidden',false);
 }
 
 function barOver(bar){
@@ -177,7 +196,7 @@ function createSpanChart(id,data,key,getMinX,getMaxX,getY,mouseOver){
   
   //Format details
   let format = Object.assign({},formatTemplate);
-  format.xLeftPadding = 360;
+  format.xLeftPadding = spanChartOff;
   format.yAxisOff = format.xLeftPadding;
   format.xAdjust = format.xLeftPadding;
   //format.height = 1000;
@@ -264,8 +283,13 @@ function createPlayersChart(data=dataset){
   
   data.sort(sortRank);
   
-  let mouseOver = function(e){
+  let mouseOver = function(d){
+    console.log("Mouse over.");
+    console.dir(this);
+    let bar = d3.select(this);
     
+    barOver(bar);
+    gameTooltip(bar,d);
   }
   
   return createSpanChart('numPlayers',data,getId,getMinPlayers,getMaxPlayers,getName,mouseOver);
@@ -277,8 +301,13 @@ function createPlaytimeChart(data=dataset){
   
   data.sort(sortRank);
   
-  let mouseOver = function(e){
+  let mouseOver = function(d){
+    console.log("Mouse over.");
+    console.dir(this);
+    let bar = d3.select(this);
     
+    barOver(bar);
+    gameTooltip(bar,d);
   }
   
   return createSpanChart('playTime',data,getId,getMinPlaytime,getMaxPlaytime,getName,mouseOver);
