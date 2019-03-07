@@ -207,23 +207,6 @@ function createPlaytimeChart(data=dataset){
 function changeChart(){
   let chartType = d3.select(this).node().value;
   console.log(`Switching charts - new chart = ${chartType}`);
-  
-  d3.select('#charts').selectAll('svg').remove();
-  
-  switch(chartType){
-    case 'category':
-      createCategoryChart();
-      break;
-    case 'mechanics':
-      createMechanicsChart();
-      break;
-    case 'numPlayers':
-      createPlayersChart();
-      break;
-    case 'playTime':
-      createPlaytimeChart();
-      break;
-  }
 }
 
 //Helper functions
@@ -274,6 +257,7 @@ function processData(data){
   charts['mechanics'] = createMechanicsChart();
   charts['numPlayers'] = createPlayersChart();
   charts['playTime'] = createPlaytimeChart();
+  
   console.log('Setting up chart switching event...');
   d3.select('#dataViews').on('change',changeChart);
 }
