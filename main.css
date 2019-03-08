@@ -35,3 +35,9 @@ svg{
   font-weight: bold;
   pointer-events: none;
 }
+
+.focus{
+  color: #007dfd;
+  font-style: italic;
+  pointer-events: none;
+}

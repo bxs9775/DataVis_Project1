@@ -95,19 +95,25 @@ function categoricalTooltip(bar,count,total,category,type){
   displayTooltip(1*bar.attr('x'),1*bar.attr('y'));
 }
 
-function gameTooltip(bar,data){
+function gameTooltip(bar,data,playerTooltip){
   tooltipDiv.selectAll('*').remove();
   
   tooltipDiv.append('p')
     .text(`${data.name} (${data.year})`)
     .attr('class','tooltipLabel');
   tooltipDiv.append('p').text(`Categories: ${data.categories.join(', ')}`);
-  tooltipDiv.append('p').text(`Merchanics: ${data.mechanics.join(', ')}`);
-  tooltipDiv.append('p').text(`Number of players: ${data.players.min}-${data.players.max}`);
+  tooltipDiv.append('p').text(`Mechanics: ${data.mechanics.join(', ')}`);
+  let playerText = tooltipDiv.append('p').text(`Number of players: ${data.players.min}-${data.players.max}`);
   let playtimeMin = playtimeFormat(data.playtime.min);
   let playtimeMax = playtimeFormat(data.playtime.max);
   let playtimeAvg = playtimeFormat(data.playtime.avg);
-  tooltipDiv.append('p').text(`Playtime: ${playtimeMin}-${playtimeMax}, adverage playtime: ${playtimeAvg}`);
+  let playtimeText = tooltipDiv.append('p').text(`Playtime: ${playtimeMin}-${playtimeMax}, adverage playtime: ${playtimeAvg}`);
+  
+  if(playerTooltip){
+    playerText.attr('class','focus');
+  } else {
+    playtimeText.attr('class','focus');
+  }
   
   displayTooltip(spanChartOff,1*bar.attr('y'));
 }
@@ -288,7 +294,7 @@ function createPlayersChart(data=dataset){
     let bar = d3.select(this);
     
     barOver(bar);
-    gameTooltip(bar,d);
+    gameTooltip(bar,d,true);
   }
   
   return createSpanChart('numPlayers',data,getId,getMinPlayers,getMaxPlayers,getName,mouseOver);
@@ -301,7 +307,7 @@ function createPlaytimeChart(data=dataset){
     let bar = d3.select(this);
     
     barOver(bar);
-    gameTooltip(bar,d);
+    gameTooltip(bar,d,false);
   }
   
   return createSpanChart('playTime',data,getId,getMinPlaytime,getMaxPlaytime,getName,mouseOver,playtimeFormat);
