@@ -22,7 +22,7 @@ formatTemplate.yAxisOff = formatTemplate.xLeftPadding;
 let spanChartOff = 360;
 
 let tooltipXOff = 14;
-let tooltipYOff = 50;
+let tooltipYOff = 300;
 
 let defaultColor = '#a8a6ac';
 let hoverColor = '#007dfd';
