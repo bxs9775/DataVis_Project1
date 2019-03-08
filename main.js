@@ -55,6 +55,26 @@ let getMaxPlaytime = (d) => d.playtime.max;
 let sortCount = (a,b) => b.count-a.count;
 let sortRank = (a,b) => b.rank-a.rank;
 
+//other functions
+let playtimeFormat = (num) => {
+  if(!num){
+    return '0 min';
+  }
+  let str = '';
+  let hours = Math.floor(num/60);
+  let minutes = num%60;
+  if(hours){
+    str = str.concat(`${hours} hrs`);
+  }
+  if(hours && minutes){
+    str = str.concat(' ');
+  }
+  if(minutes){
+    str = str.concat(`${minutes} min`)
+  }
+  return str;
+}
+
 //Tooltip and mouseover methods
 function displayTooltip(x,y){
   tooltipDiv
@@ -85,7 +105,10 @@ function gameTooltip(bar,data){
   tooltipDiv.append('p').text(`Categories: ${data.categories.join(', ')}`);
   tooltipDiv.append('p').text(`Merchanics: ${data.mechanics.join(', ')}`);
   tooltipDiv.append('p').text(`Number of players: ${data.players.min}-${data.players.max}`);
-  tooltipDiv.append('p').text(`Number of players: ${data.playtime.min}-${data.playtime.max} minutes, adverage playtime: ${data.playtime.avg} minutes`);
+  let playtimeMin = playtimeFormat(data.playtime.min);
+  let playtimeMax = playtimeFormat(data.playtime.max);
+  let playtimeAvg = playtimeFormat(data.playtime.avg);
+  tooltipDiv.append('p').text(`Number of players: ${playtimeMin}-${playtimeMax}, adverage playtime: ${playtimeAvg}`);
   
   displayTooltip(spanChartOff,1*bar.attr('y'));
 }
@@ -119,8 +142,11 @@ function createYScale(format,data,getY){
   return yScale;
 }
 
-function createAxes(chart,format,xScale,yScale){
+function createAxes(chart,format,xScale,yScale,tickFormat=null){
   var xAxis = d3.axisBottom(xScale);
+  if(tickFormat){
+    xAxis.tickFormat(tickFormat);
+  }
   var yAxis = d3.axisLeft(yScale);
   
   chart.append('g')
@@ -132,6 +158,7 @@ function createAxes(chart,format,xScale,yScale){
     .attr('class', 'yaxis axis')
     .attr('transform', `translate(${format.yAxisOff},0 )`)
     .call(yAxis);
+  
   
   return {
     xAxis: xAxis,
@@ -186,12 +213,13 @@ function createBarChart(id,data,key,getX,getY,mouseOver){
   };
 }
 
-function createSpanChart(id,data,key,getMinX,getMaxX,getY,mouseOver){
+function createSpanChart(id,data,key,getMinX,getMaxX,getY,mouseOver,tickFormat=null){
   console.log('Create span chart...');
   
   //Format details
   let format = Object.assign({},formatTemplate);
   format.xLeftPadding = spanChartOff;
+  format.xRightPadding = 36;
   format.yAxisOff = format.xLeftPadding;
   format.xAdjust = format.xLeftPadding;
   //format.height = 1000;
@@ -224,7 +252,7 @@ function createSpanChart(id,data,key,getMinX,getMaxX,getY,mouseOver){
     .on('mouseout',barOut);
   
   //Axis
-  let axes = createAxes(chart,format,xScale,yScale);
+  let axes = createAxes(chart,format,xScale,yScale,tickFormat);
   
   return {
     id: id,
@@ -305,7 +333,7 @@ function createPlaytimeChart(data=dataset){
     gameTooltip(bar,d);
   }
   
-  return createSpanChart('playTime',data,getId,getMinPlaytime,getMaxPlaytime,getName,mouseOver);
+  return createSpanChart('playTime',data,getId,getMinPlaytime,getMaxPlaytime,getName,mouseOver,playtimeFormat);
 }
 
 function collapseChart(id){
