@@ -108,7 +108,7 @@ function gameTooltip(bar,data){
   let playtimeMin = playtimeFormat(data.playtime.min);
   let playtimeMax = playtimeFormat(data.playtime.max);
   let playtimeAvg = playtimeFormat(data.playtime.avg);
-  tooltipDiv.append('p').text(`Number of players: ${playtimeMin}-${playtimeMax}, adverage playtime: ${playtimeAvg}`);
+  tooltipDiv.append('p').text(`Playtime: ${playtimeMin}-${playtimeMax}, adverage playtime: ${playtimeAvg}`);
   
   displayTooltip(spanChartOff,1*bar.attr('y'));
 }
