@@ -12,6 +12,10 @@ svg{
   display: none;
 }
 
+#charts{
+  position: relative;
+}
+
 #tooltip{
   position: absolute;
   pointer-events: none;

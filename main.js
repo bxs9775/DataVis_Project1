@@ -21,8 +21,8 @@ formatTemplate.xAxisOff = formatTemplate.yBottomPadding;
 formatTemplate.yAxisOff = formatTemplate.xLeftPadding;
 let spanChartOff = 360;
 
-let tooltipXOff = 14;
-let tooltipYOff = 300;
+let tooltipXOff = 8;
+let tooltipYOff = 24;
 
 let defaultColor = '#a8a6ac';
 let hoverColor = '#007dfd';
@@ -92,7 +92,6 @@ function categoricalTooltip(bar,count,total,category,type){
   tooltipDiv.append('p')
     .text(`${count} out of  ${total} games in the selection have the ${type} ${category}.`);
   
-  //I don't know why but the below code breaks whrn it is a seperate function.
   displayTooltip(1*bar.attr('x'),1*bar.attr('y'));
 }
 
@@ -120,8 +119,6 @@ function barOver(bar){
 }
 
 function barOut(data){
-  console.log("Mouse out.");
-  console.dir(this);
   d3.select(this)
     .transition('mouseOff')
     .duration(transition)
@@ -135,8 +132,7 @@ function barOut(data){
 function createYScale(format,data,getY){
   let yScale = d3.scaleBand()
     .domain(data.map(getY))
-    //.rangeRound([0,format.height-format.yBottomPadding])
-    //Rangeround was producing undesirable extra-space at the ends of charts. Switching to range 
+    //Rangeround has been producing undesirable extra-space at the ends of charts. Switching to range...
     .range([0,format.height-format.yBottomPadding])
     .paddingInner(format.yInnerPadding);
   return yScale;
@@ -167,11 +163,9 @@ function createAxes(chart,format,xScale,yScale,tickFormat=null){
 }
 
 function createBarChart(id,data,key,getX,getY,mouseOver){
-  console.log('Create bar chart...');
   
   //Format details
   let format = Object.assign({},formatTemplate);
-  console.dir(format);
   
   //Create scales
   let xMax = d3.max(data,getX);
@@ -214,15 +208,12 @@ function createBarChart(id,data,key,getX,getY,mouseOver){
 }
 
 function createSpanChart(id,data,key,getMinX,getMaxX,getY,mouseOver,tickFormat=null){
-  console.log('Create span chart...');
-  
   //Format details
   let format = Object.assign({},formatTemplate);
   format.xLeftPadding = spanChartOff;
   format.xRightPadding = 36;
   format.yAxisOff = format.xLeftPadding;
   format.xAdjust = format.xLeftPadding;
-  //format.height = 1000;
   
   //Create scales
   let xMax = d3.max(data,getMaxX);
@@ -265,14 +256,9 @@ function createSpanChart(id,data,key,getMinX,getMaxX,getY,mouseOver,tickFormat=n
 }
 
 function createCategoryChart(data=categoryData,total=totalGames){
-  //console.log('Create category chart');
-  //console.dir(data);
-  
   data.sort(sortCount);
   
   let mouseOver = function(d){
-    console.log("Mouse over.");
-    console.dir(this);
     let bar = d3.select(this);
     
     barOver(bar);
@@ -283,14 +269,9 @@ function createCategoryChart(data=categoryData,total=totalGames){
 }
 
 function createMechanicsChart(data=mechanicData,total=totalGames){
-  //console.log('Create mechanics chart');
-  //console.dir(data);
-  
   data.sort(sortCount);
   
   let mouseOver = function(d){
-    console.log("Mouse over.");
-    console.dir(this);
     let bar = d3.select(this);
     
     barOver(bar);
@@ -301,14 +282,9 @@ function createMechanicsChart(data=mechanicData,total=totalGames){
 }
 
 function createPlayersChart(data=dataset){
-  //console.log('Create players chart');
-  //console.dir(data);
-  
   data.sort(sortRank);
   
   let mouseOver = function(d){
-    console.log("Mouse over.");
-    console.dir(this);
     let bar = d3.select(this);
     
     barOver(bar);
@@ -319,14 +295,9 @@ function createPlayersChart(data=dataset){
 }
 
 function createPlaytimeChart(data=dataset){
-  //console.log('Create playtime chart');
-  //console.dir(data);
-  
   data.sort(sortRank);
   
   let mouseOver = function(d){
-    console.log("Mouse over.");
-    console.dir(this);
     let bar = d3.select(this);
     
     barOver(bar);
@@ -338,7 +309,6 @@ function createPlaytimeChart(data=dataset){
 
 function collapseChart(id){
   let chart = d3.select(`#${id}`);
-  console.log(chart);
   chart.transition('collapseChart')
     .duration(transition)
     .attr('width',0).on('end',function(){
@@ -349,12 +319,7 @@ function collapseChart(id){
 }
 
 function expandChart(id){
-  console.log(id);
-  console.log(`#${id}`);
-  console.dir(charts[id]);
-  
   let chart = d3.select(`#${id}`);
-  console.log(chart);
   chart.classed('hidden',false);
   chart.transition('expandChart')
     .duration(transition)
@@ -365,7 +330,6 @@ function expandChart(id){
 
 function changeChart(){
   let chartType = d3.select(this).node().value;
-  console.log(`Switching charts - chart = ${chartType}`);
   
   collapseChart(currChartId);
   expandChart(chartType);
@@ -378,13 +342,10 @@ function getArrayValuesCount(data, getArray){
   
   let values = data.map(getArray).flat();
   
-  //console.dir(values);
-  
   //unique values counting solution from https://stackoverflow.com/questions/12749200/how-to-count-array-elements-by-each-element-in-javascript
   for(var i = 0; i < values.length; i++){
     counts[values[i]] = (counts[values[i]]+1) || 1;
   }
-  //console.dir(counts);
   let entries = Object.entries(counts);
   return entries;
 }
@@ -408,8 +369,6 @@ function getMechanicsArray(data){
 }
 
 function processData(data){
-  console.log('Processing data');
-  console.dir(data);
   dataset = data;
   totalGames = dataset.length;
   
@@ -421,16 +380,12 @@ function processData(data){
   charts['numPlayers'] = createPlayersChart();
   charts['playTime'] = createPlaytimeChart();
   
-  console.dir(charts);
-  
   expandChart('category');
   
-  console.log('Setting up chart switching event...');
   d3.select('#dataViews').on('change',changeChart);
 }
 
 function rowConverter(data){
-  console.log('Converting data');
   return {
     rank: parseInt(data.rank),
     id: data.game_id,
@@ -452,8 +407,6 @@ function rowConverter(data){
 
 //Setup
 function setup(){
-  console.log('Setup');
-  
   chartDiv = d3.select('#charts');
   tooltipDiv = d3.select('#tooltip');
   
